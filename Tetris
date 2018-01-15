@@ -1,0 +1,226 @@
+/* SUBMITTED BY: Hannah Johnson
+For: Oxford College of Emory University, CS170, Prof. Paul Oser
+THIS CODE IS MY OWN WORK, WRITTEN WITHOUT CONSULTING OTHER STUDENTS OR ONLINE RESOURCES.
+DO NOT COPY. CONSULT YOUR SCHOOL'S HONOR CODE.
+*/ 
+
+import acm.program.GraphicsProgram;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.util.Random;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.Timer;
+import acm.graphics.GImage;
+import acm.graphics.GRect;
+import acm.program.GraphicsProgram;
+import acm.toys.PixelGrid;
+
+public class Tetris extends GraphicsProgram {
+
+	protected static JLabel score;
+	private JButton startBtn;
+	private JButton restartBtn;
+	private GRect border;
+	protected static PixelGrid pixels;
+	protected int WindWid = 362;
+	protected int WindHei = 512;
+	protected int ColNum = 10;
+	protected int RowNum = 15;
+	private static int highScore;
+	private Timer timer;
+	private int delay = 500;
+	Tetromino currentTetromino;
+	private Random random = new Random();
+	private GImage TetrisLabel = new GImage("C:\\Users\\Hannah\\Desktop\\Tetris_Label.png");
+	private GImage gameOver = new GImage("C:\\Users\\Hannah\\Desktop\\Game_Over.jpg");
+	
+	public void init() {
+		
+		this.setSize(403,625);
+		this.setBackground(Color.BLACK);
+		this.add(TetrisLabel,0,190);
+	
+		score = new JLabel("Score = " + highScore);
+		startBtn = new JButton("Start");
+		restartBtn = new JButton("Restart");
+		border = new GRect(40,40,319,479);
+		pixels = new PixelGrid(WindWid, WindHei, ColNum, RowNum, 2);
+		for (int row = 0; row < RowNum; row++) {
+			for (int col = 0; col < ColNum; col++) {
+				pixels.plot(col, row, Color.GRAY);
+			}
+		}
+		Tetris.this.add(startBtn,SOUTH);
+		Tetris.this.add(restartBtn,SOUTH);
+		score.setText("Score = " + 0);
+		Tetris.this.add(score, NORTH);
+		restartBtn.setEnabled(false);
+		
+		startBtn.addActionListener(new ActionListener() {
+	
+			public void actionPerformed(ActionEvent e) {
+				
+				Tetris.this.remove(TetrisLabel);
+				Tetris.this.setBackground(new Color(50,220,150));
+				pixels.plot(40,40, Color.GRAY);
+				Tetris.this.add(pixels,40,40);
+				Tetris.this.add(border);
+				restartBtn.setEnabled(true);
+				int type = random.nextInt(7);
+				currentTetromino = new Tetromino(type, 0);
+				updateGUI();
+				timer.start();
+				startBtn.setEnabled(false);
+				Tetris.this.getGCanvas().requestFocus();		
+			}});
+		
+		this.addKeyListeners(new KeyListener() {
+
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_UP) {
+					currentTetromino.rotate();
+					updateGUI();								
+				}
+				if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+					currentTetromino.move('l');
+					updateGUI();
+				}
+				if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+					currentTetromino.move('r');
+					updateGUI();
+				}
+				if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+					timer.setDelay(100);
+				}
+			}
+
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+					timer.setDelay(delay);
+				}
+			}
+			public void keyTyped(KeyEvent arg0) {}
+			});
+		
+		this.getGCanvas().requestFocus();
+		
+		timer = new Timer(delay, new ActionListener() {				
+
+			public void actionPerformed(ActionEvent e) {
+				currentTetromino.move('d');
+				if ((currentTetromino.row() == 0 && currentTetromino.col() == 3) && (currentTetromino.isFrozen())) {
+					Tetris.this.getGCanvas().add(gameOver);
+					timer.stop();
+				}
+				if (currentTetromino.isFrozen()) {
+					highScore += 10;
+					score.setText("Score = " + highScore);
+					Tetromino.clearFullRows();
+					int type = random.nextInt(7);
+					currentTetromino = new Tetromino(type, 0);
+					currentTetromino.isNotFrozen();
+					updateGUI();
+				}
+				updateGUI();
+				if (highScore < 100) {	
+					delay = 1000;
+					timer.setDelay(delay);
+				}
+				else if ((highScore >= 100) && (highScore < 500)) {
+					delay = 750;
+					timer.setDelay(delay);
+				}
+				else if ((highScore >= 500) && (highScore < 1000)) {
+					delay = 500;
+					timer.setDelay(delay);
+				}
+				else if ((highScore >= 1000) && (highScore < 1500)) {
+					delay = 250;
+					timer.setDelay(delay);
+				}
+				else if (highScore >= 1500) {
+					delay = 100;
+					timer.setDelay(delay);
+				}
+			}});
+		
+		restartBtn.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				Tetromino.clearBoardArray();
+				Tetris.this.getGCanvas().remove(gameOver);
+				clearGUI();
+				highScore = 0;
+				score.setText("Score = " + highScore);
+				timer.stop();
+				startBtn.setEnabled(true);
+			}});
+	}
+	
+	public void updateGUI() {
+    	
+    	if (currentTetromino.isFrozen() == true) {
+    		for (int i = 0; i < ColNum; i++) {
+				for (int j = 0; j < RowNum; j++) {
+					if ((Tetromino.getBoard())[i][j] != 0) {
+						pixels.plot(i,  j,  Tetromino.getColors()[(Tetromino.getBoard())[i][j] - 1]);
+					}
+				}
+    		}
+    	}
+    	else {
+			for (int i = 0; i < ColNum; i++) {
+				for (int j = 0; j < RowNum; j++) {
+					if ((Tetromino.getBoard())[i][j] != 0) {
+						pixels.plot(i,  j,  Tetromino.getColors()[(Tetromino.getBoard())[i][j] - 1]);
+					}
+					else {
+						pixels.plot(i, j, Tetromino.BACKGROUND_COLOR);
+					}
+				}
+			}
+    	}
+		
+    	Tetromino t = currentTetromino;
+    	int[][] fourByFour = t.getFourByFour();
+    	int row = t.row();
+    	int col = t.col();
+    	for (int r = 0; r < 4; r++) {
+    		for (int c = 0; c < 4; c++) {
+    			if (fourByFour[c][r] != 0) {
+    			    pixels.plot(col+c, row+r, t.color());
+    			}
+    		}
+    	}
+	}
+    
+    public void clearGUI() {
+    	for (int i = 0; i < ColNum; i++) {
+			for (int j = 0; j < RowNum; j++) {
+				if ((Tetromino.getBoard())[i][j] != 0) {
+					pixels.plot(i,  j,  Tetromino.getColors()[(Tetromino.getBoard())[i][j] - 1]);
+				}
+				else {
+					pixels.plot(i, j, Tetromino.BACKGROUND_COLOR);
+				}
+			}
+		}
+    }
+    
+    public static int getHighScore() {
+    	return highScore;
+    }
+    
+    public static void addHighScore(int i) {
+    	highScore += i;
+    }
+    
+    public static void setScore(String i) {
+    	score.setText("Score = " + i);
+    }
+    
+}
