@@ -1,0 +1,38 @@
+/* SUBMITTED BY: Hannah Johnson
+For: Oxford College of Emory University, CS170, Prof. Paul Oser
+THIS CODE IS MY OWN WORK, WRITTEN WITHOUT CONSULTING OTHER STUDENTS OR ONLINE RESOURCES.
+DO NOT COPY. CONSULT YOUR SCHOOL'S HONOR CODE.
+*/ 
+
+import java.awt.Color;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import acm.graphics.GRect;
+import acm.program.GraphicsProgram;
+import acm.toys.PixelGrid;
+
+public class TetrisBoard extends GraphicsProgram {
+	
+	private JLabel score;
+	private JButton startPause;
+	private JButton restart;
+	private GRect border;
+	private PixelGrid pixels;
+	
+	public void init() {
+		
+		this.setSize(400,600);
+		
+		score = new JLabel("Score: ");
+		startPause = new JButton("Start");
+		restart = new JButton("Restart");
+		pixels = new PixelGrid(350,500,50,50,0);
+		this.add(score, NORTH);
+		this.add(startPause,SOUTH);
+		this.add(restart,SOUTH);
+		this.add(pixels);
+		
+		
+		
+	}
+	
