@@ -1,0 +1,234 @@
+/* SUBMITTED BY: Hannah Johnson
+For: Oxford College of Emory University, CS170, Prof. Paul Oser
+THIS CODE IS MY OWN WORK, WRITTEN WITHOUT CONSULTING OTHER STUDENTS OR ONLINE RESOURCES.
+DO NOT COPY. CONSULT YOUR SCHOOL'S HONOR CODE.
+*/
+
+import java.awt.Color;
+
+public class Tetromino {
+
+	public static final int O = 0;
+	public static final int I = 1;
+	public static final int T = 2;
+	public static final int S = 3;
+	public static final int Z = 4;
+	public static final int J = 5;
+	public static final int L = 6;
+	
+	public static Color BACKGROUND_COLOR = Color.GRAY;
+	public static Color[] colors = {Color.YELLOW, Color.CYAN, Color.MAGENTA, Color.GREEN, Color.RED, Color.BLUE, Color.PINK};
+	
+	public static int blocks[][][][] = {
+			                            {{{1, 1, 0, 0}, {1, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}}},	// O
+			                            {{{2, 2, 2, 2}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},	// I1
+		                                 {{2, 0, 0, 0}, {2, 0, 0, 0}, {2, 0, 0, 0}, {2, 0, 0, 0}}},	// I2
+			                            {{{0, 3, 0, 0}, {3, 3, 3, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},	// T1
+		                                {{3, 0, 0, 0}, {3, 3, 0, 0}, {3, 0, 0, 0}, {0, 0, 0, 0}},	// T2
+			                            {{3, 3, 3, 0}, {0, 3, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},	// T3
+			                            {{0, 3, 0, 0}, {3, 3, 0, 0}, {0, 3, 0, 0}, {0, 0, 0, 0}}},	// T4
+			                            {{{0, 4, 4, 0}, {4, 4, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},	// S1
+		                                {{4, 0, 0, 0}, {4, 4, 0, 0}, {0, 4, 0, 0}, {0, 0, 0, 0}}},	// S2
+		                                {{{5, 5, 0, 0}, {0, 5, 5, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},	// Z1
+		                                {{0, 5, 0, 0}, {5, 5, 0, 0,}, {5, 0, 0, 0}, {0, 0, 0, 0}}},	// Z2
+		                                {{{6, 0, 0, 0}, {6, 6, 6, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},	// J1
+		                                {{6, 6, 0, 0}, {6, 0, 0, 0}, {6, 0, 0, 0,}, {0, 0, 0, 0}},	// J2
+		                                {{6, 6, 6, 0}, {0, 0, 6, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},	// J3
+		                                {{0, 6, 0, 0}, {0, 6, 0, 0}, {6, 6, 0, 0}, {0, 0, 0, 0}}},	// J4
+		                                {{{0, 0, 7, 0}, {7, 7, 7, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},	// L1
+		                                {{7, 0, 0, 0}, {7, 0, 0, 0}, {7, 7, 0, 0}, {0, 0, 0, 0}},	// L2
+		                                {{7, 7, 7, 0}, {7, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},	// L3
+		                                {{7, 7, 0, 0}, {0, 7, 0, 0}, {0, 7, 0, 0}, {0, 0, 0, 0}}}	// L4
+		                                };
+	
+	public static int[][] board = new int[13][18];
+	private static int type;
+	static int row;
+	static int col;
+	private boolean isFrozen = false;
+	private static int orientation;
+	
+	public Tetromino(int type, int orientation) {
+		Tetromino.type = type;
+		Tetromino.orientation = orientation;
+		row = 0;
+		col = 3;
+	}
+	
+	public boolean isFrozen() {
+		return isFrozen;
+	}
+	
+	public void isNotFrozen() {
+		isFrozen = false;
+	}
+	
+	public static int[][] getBoard() {
+		return board;
+	}
+	
+	public static Color[] getColors() {
+		return colors;
+	}
+	public int row() {
+		return row;
+	}
+	public void setRow(int r) {
+		row = r;
+	}
+	
+	public int col() {
+		return col;
+	}
+	public void setCol(int c) {
+		col = c;
+	}
+	
+	public static int type() {
+		return type;
+	}
+	
+	public int[][] getFourByFour() {
+		return blocks[type][orientation];
+	}
+	
+	public static void clearBoardArray() {
+		for (int row = 0; row < 15; row++) {
+			for (int col = 0; col < 10; col++) {
+				board[col][row] = 0;
+			}
+		}
+	}
+	
+	public static void clearRow(int r) {
+		for (int row = r - 1; row >= 0; row--) {
+			for (int col = 0; col < 10; col++) {
+				board[col][row+1] = board[col][row];
+			}
+		}
+	}
+	
+	public static void clearFullRows() {
+		boolean isFull = true;
+		for (int row = 0; row < 15; row++) {
+			for (int col = 0; col < 10; col++) {
+				if (board[col][row] == 0) {
+					isFull = false;
+				}
+			}
+			if (isFull) {
+				clearRow(row);
+				Tetris.addHighScore(100);
+				Tetris.score.setText("Score = " + Tetris.getHighScore());
+			}
+			isFull = true;
+		}
+	}
+	
+	public static int orientation() {
+		return orientation;
+	}
+	
+	public Color color() {
+		return colors[type];
+	}
+	
+	public void rotate() {
+		orientation = (orientation + 1) % blocks[type].length;
+	}
+	
+	private int colToCheckForLeftMovement(int rw) {
+		int[][] fourByFour = this.getFourByFour();
+		int cl = 0;
+		while ((cl < 4) && (fourByFour[cl][rw] == 0)) {
+			cl++;
+		}
+		return cl;
+	}
+	
+	private int colToCheckForRightMovement(int rw) {
+		int[][] fourByFour = this.getFourByFour();
+		int cl = 3;
+		while ((cl >= 0) && (fourByFour[cl][rw] == 0)) {
+			cl--;
+		}
+		return cl;
+	}
+	
+	private int rowToCheckForDownMovement(int cl) {
+		int[][] fourByFour = this.getFourByFour();
+		int rw = 3;
+		while ((rw >= 0) && (fourByFour[cl][rw] == 0)) {
+			rw--;
+		}
+		return rw;
+	}
+	
+	private boolean isSafeToMoveLeft() {
+		if (col == 0) {
+			return false;
+		}
+		for (int r = 0; r < 4; r++) {
+			int c = colToCheckForLeftMovement(r);
+			if ((c != 4) && (((col+c) <= 0) || (board[col+(c-1)][row+r] != 0))) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private boolean isSafeToMoveRight() {
+		for (int r = 0; r < 4; r++) {
+			int c = colToCheckForRightMovement(r);
+			if ((c != -1) && (((col+c) >= 9) || (board[col+(c+1)][row+r] != 0))) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private boolean isSafeToMoveDown() {
+		for (int c = 0; c < 4; c++) {
+			int r = rowToCheckForDownMovement(c);
+			if ((r != -1) && (((row+r) == 14) || (board[col+c][row+(r+1)] != 0))) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private void freeze() {
+		isFrozen = true;
+		int[][] fourByFour = getFourByFour();
+		for (int r = 0; r < 4; r++) {
+			for (int c = 0; c < 4; c++) {
+				if (fourByFour[c][r] != 0) {
+					board[col + c][row + r] = fourByFour[c][r];
+				}
+			}
+		}
+	}
+	
+	public boolean move(char direction) {
+		switch (direction) {
+		case 'd' : if (isSafeToMoveDown()) {
+				   	  row++;
+			          return true;
+				   }
+				   else {
+					freeze();
+					return false;
+				   }
+		case 'l' : if (isSafeToMoveLeft()) {
+			          col--;
+				      return true;
+				   } break;
+		case 'r' : if (isSafeToMoveRight()) {
+				   	  col++;
+				      return true; 
+				   }
+		}
+		return true;
+	}
+	
+}
